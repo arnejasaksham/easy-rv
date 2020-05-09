@@ -29,7 +29,7 @@ void {{$block.Name}}_run_monitor_{{$pol.Name}}(monitorvars_{{$block.Name}}_t* me
 				me->{{$ex.VarName}} = {{$ex.Value}};{{end}}
 				break;
 			} {{end}}{{end}}
-			
+			me->_policy_{{$pol.Name}}_state = POLICY_STATE_{{$block.Name}}_{{$pol.Name}}_mismatch;
 			//ensure a transition was taken in this state
 			//assert(false && "{{$block.Name}}_{{$pol.Name}}_{{$st.Name}} must take a transition"); //if we are still here, then no transition was taken and we are no longer satisfying liveness
 
