@@ -7,7 +7,7 @@ import (
 	"os"
 	"strings"
 
-	"github.com/PRETgroup/easy-rv/rvc"
+	"github.com/arnejasaksham/easy-rv/rvc"
 )
 
 var (
