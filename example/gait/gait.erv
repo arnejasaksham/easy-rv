@@ -1,0 +1,89 @@
+monitor gait;
+interface of gait {
+    uint8_t np; //newphase
+}
+
+policy Matching of gait
+{
+	internals
+	{
+		dtimer_t x; //time spent in the phase
+		
+		uint64_t ds1;
+		uint64_t dts;
+		uint64_t ss;
+		uint64_t std;
+		uint64_t ds2;
+		uint64_t itm;
+		uint64_t mtt;
+		uint64_t tti;
+	}
+
+	states
+	{
+
+		//Person seen for first time
+		init accepting
+		{
+			->initial_contact  on np=1 : x:=0;
+			->loading_response on np=2 : x:=0;
+			->mid_stance       on np=3 : x:=0;
+			->terminal_stance  on np=4 : x:=0;
+			->pre_swing        on np=5 : x:=0;
+			->initial_swing    on np=6 : x:=0;
+			->mid_swing        on np=7 : x:=0;
+			->terminal_swing   on np=8 : x:=0;
+		}
+
+		initial_contact accepting
+		{
+			->initial_contact  on x<ds1 && np=1;
+			->loading_response on x>=ds1 && np=2: x:=0;
+		}
+		
+		loading_response accepting
+		{
+			->loading_response on x<dts && np=2;
+			->mid_stance       on x>=dts && np=3: x:=0;
+		}
+		
+		mid_stance accepting
+		{
+			->mid_stance      on x<ss && np=3;
+			->terminal_stance on x>=ss && np=4: x:=0;
+		}
+		
+		terminal_stance accepting
+		{
+			->terminal_stance on x<std && np=4;
+			->pre_swing       on x>=std && np=5: x:=0;
+		}
+		
+		pre_swing accepting
+		{
+			->pre_swing     on x<ds2 && np=5;
+			->initial_swing on x>=ds2 && np=6: x:=0;
+		}
+		
+		initial_swing accepting
+		{
+			->initial_swing on x<itm && np=6;
+			->mid_swing     on x>=itm && np=7: x:=0;
+		}
+		
+		mid_swing accepting
+		{
+			->mid_swing      on x<mtt && np=7;
+			->terminal_swing on x>=mtt && np=8: x:=0;
+		}
+		
+		terminal_swing accepting
+		{
+			->terminal_swing  on x<tti && np=8;
+			->initial_contact on x>=tti && np=1: x:=0;
+		}
+		
+		//person mismatch
+		mismatch rejecting trap;
+	}
+}
