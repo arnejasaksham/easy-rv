@@ -3,8 +3,10 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-void print_data(uint32_t count, monitorvars_gait_t mon, io_gait_t io) {
-    printf("Tick: %4d;\tPHASE: %2d;\tSTATE: %2d;\tSTATUS(Match): ", count, io.np, mon._policy_Matching_state);
+#define n 10
+
+void print_data(uint64_t count, monitorvars_gait_t mon, io_gait_t io) {
+    printf("Tick: %4ld;\tPHASE: %2d;\tSTATE: %2d;\tSTATUS(Match): ", count, io.np, mon._policy_Matching_state);
     switch(gait_check_rv_status_Matching(&mon)) {
         case 0: printf("TRUE"); break;
         case 1: printf("CURRENTLY TRUE"); break;
@@ -16,10 +18,20 @@ void print_data(uint32_t count, monitorvars_gait_t mon, io_gait_t io) {
 
 int main(int argc, char *argv[])
 {
-	const int n = atoi(argv[1]);
+	//const int n = atoi(argv[1]);
+	
+	printf("1- Initial Contact\n2- LoadingResponse\n3- Mid Stance\n4- Terminal Stance\n5- Pre Swing\n6-Initial Swing\n7-Mid Swing\n8-Terminal Swing\n");
+	
 	monitorvars_gait_t mon[n];
 	io_gait_t io[n];
-	uint64_t ds1[2]={1,2}, dts[2]={2,4}, ss[2]={3,6}, std[2]={4,7}, ds2[2]={5,5}, itm[2]={6,2}, mtt[2]={7,3}, tti[2]={8,8};
+	uint64_t ds1[n] = {3, 3, 4, 4, 3, 4, 3, 3, 4, 3},
+		 dts[n] = {5, 3, 3, 4, 2, 3, 3, 4, 3, 3},
+		 ss[n]  = {5, 4, 5, 4, 5, 4, 4, 4, 4, 4},
+		 std[n] = {4, 3, 2, 5, 4, 4, 2, 3, 5, 3},
+		 ds2[n] = {2, 3, 4, 4, 3, 5, 4, 4, 3, 4},
+		 itm[n] = {3, 2, 2, 4, 2, 2, 2, 3, 3, 3},
+		 mtt[n] = {6, 5, 6, 5, 6, 5, 5, 5, 5, 4},
+		 tti[n] = {3, 4, 3, 4, 3, 3, 3, 3, 4, 3};
 
 	for(int i=0;i<n;i++)
 	{
@@ -27,27 +39,29 @@ int main(int argc, char *argv[])
 		io[i].np = 4;
 		}
 
-	uint32_t count = 0;
+	uint64_t count = 0;
+	uint8_t np=0;
 	
-	while(count++ < 50)
+	while(count < 50)
 	{
+		while(np<1 || np>8)
+		{
+			printf("Enter next phase: ");
+			scanf("%hhu", &np);
+			if(np<1 || np>8)
+				printf("Valid phases are 1 to 8.\n1- Initial Contact\n2- LoadingResponse\n3- Mid Stance\n4- Terminal Stance\n5- Pre Swing\n6-Initial Swing\n7-Mid Swing\n8-Terminal Swing\n");
+		}
 		for(int i=0;i<n;i++)
 		{
-			if(count == 8) io[i].np = 5;
-			if(count == 15) io[i].np = 6;
-			if(count == 17) io[i].np = 7;
-			if(count == 19) io[i].np = 8;
-			if(count == 25) io[i].np = 1;
-			if(count == 30) io[i].np = 2;
-			if(count == 35) io[i].np = 3;
-
-			//wait here until gait expires
+			io[i].np = np;
 			
 			gait_run_via_monitor(&(mon[i]), &(io[i]));
 			printf("Monitor %2d--> ", i);
 			print_data(count, mon[i], io[i]);
 		}
 		printf("\n");
+		np=0;
+		count++;
 	}
 }
 
